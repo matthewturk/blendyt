@@ -12,17 +12,19 @@ import pyopenvdb as vdb
 
 ds = yt.load_sample("IsolatedGalaxy")
 
-g_vdbs = []
+g_vdbs = {_: vdb.FloatGrid() for _ in range(ds.index.max_level + 1)}
+for i in g_vdbs:
+    g_vdbs[i].name = f"Level {i}"
+    g_vdbs[i].transform = vdb.createLinearTransform(
+        voxelSize=ds.index.select_grids(i)[0].dds[0].d
+    )
+
 for g in ds.index.grids:
-    if g.Level == 0:
-        continue
-    g_dens = vdb.FloatGrid()
+    g_dens = g_vdbs[g.Level]
     g_dens.copyFromArray(
-        g["density"].in_units("code_density").d,
+        g["density"].in_units("code_density").d * g.child_mask,
         ijk=g.get_global_startindex(),
     )
-    g_dens.transform = vdb.createLinearTransform(voxelSize=g.dds[0].d)
-    g_dens.name = str(g)
-    g_vdbs.append(g_dens)
+    # print(g_dens.activeVoxelCount(), g.child_mask.sum())
 
-vdb.write("galaxy.vdb", g_vdbs)
+vdb.write("galaxy.vdb", list(g_vdbs.values()))
