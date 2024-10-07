@@ -1,7 +1,21 @@
-import geometry_script as gs
+import nodetree_script as ns
+import nodetree_script.api.dynamic.geometry as gs
 
 
-@gs.tree("Load AMR Grids")
+class TerrainInputs(ns.InputGroup):
+    width: ns.Float
+    height: ns.Float
+    resolution: ns.Int
+    scale: ns.Float
+    w: ns.Float
+
+
+@ns.tree("Experiment")
+def do_something(inputs: TerrainInputs):
+    return gs.cube(size=(1.0, 1.0, 1.0)).mesh
+
+
+@ns.tree("Load AMR Grids")
 def my_thing():
     points = gs.volume_cube(
         resolution_x=32,
