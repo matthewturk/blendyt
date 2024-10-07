@@ -8,4 +8,9 @@ def outward_facing_sphere():
     points = gs.distribute_points_on_faces(mesh=sphere.mesh, density=0.01)
     line = gs.mesh_line()
     rotation = gs.align_rotation_to_vector(vector=gs.position())
-    return gs.instance_on_points(points=points.points, instance=line, rotation=rotation)
+    return {
+        "Geometry": gs.instance_on_points(
+            points=points.points, instance=line, rotation=rotation
+        ),
+        "Points": points.points,
+    }
