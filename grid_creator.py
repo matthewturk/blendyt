@@ -1,6 +1,7 @@
 import nodetree_script as ns
 import nodetree_script.api.dynamic.geometry as gs
 import nodetree_script.api.dynamic.shader as ss
+import numpy as np
 
 
 class GridSpecification(ns.InputGroup):
@@ -9,6 +10,16 @@ class GridSpecification(ns.InputGroup):
     nx: ns.Int
     ny: ns.Int
     nz: ns.Int
+
+
+@ns.tree("Points from Vertices")
+def points_from_file(geometry: ns.Geometry):
+    x = gs.named_attribute(name="x").attribute
+    y = gs.named_attribute(name="y").attribute
+    z = gs.named_attribute(name="z").attribute
+    pos = gs.combine_xyz(x=x, y=y, z=z)
+    points = gs.set_position(geometry=gs.mesh_to_points(mesh=geometry), position=pos)
+    return gs.instance_on_points(points=points, instance=gs.uv_sphere().mesh)
 
 
 @ns.tree("Grid as Points")
