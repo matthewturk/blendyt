@@ -12,8 +12,15 @@ class GridSpecification(ns.InputGroup):
     nz: ns.Int
 
 
-@ns.tree("Points from Vertices")
-def points_from_file(geometry: ns.Geometry):
+@ns.tree("Select Vertex by Index")
+def select_vertex_by_index(geometry: ns.Geometry, index: ns.Int):
+    vindex = gs.index()
+    comparison = gs.math(operation=gs.Math.Operation.COMPARE, value=(index, vindex))
+    return gs.separate_geometry(geometry=geometry, selection=comparison).selection
+
+
+@ns.tree("Spheres at Vertex Attributes")
+def spheres_at_vertex_attributes(geometry: ns.Geometry):
     x = gs.named_attribute(name="x").attribute
     y = gs.named_attribute(name="y").attribute
     z = gs.named_attribute(name="z").attribute
