@@ -12,28 +12,28 @@ class GridSpecification(ns.InputGroup):
     nz: ns.Int
 
 
-@ns.tree("Select Vertex by Index")
-def select_vertex_by_index(geometry: ns.Geometry, index: ns.Int):
-    vindex = gs.index()
-    comparison = gs.math(operation=gs.Math.Operation.COMPARE, value=(index, vindex))
-    return gs.separate_geometry(geometry=geometry, selection=comparison).selection
-
-
-@ns.tree("Spheres at Vertex Attributes")
-def spheres_at_vertex_attributes(geometry: ns.Geometry):
+@ns.tree("Positions from CSV")
+def positions_from_csv(geometry: ns.Geometry, animation_scale: ns.Float):
     x = gs.named_attribute(name="x").attribute
     y = gs.named_attribute(name="y").attribute
     z = gs.named_attribute(name="z").attribute
     pos = gs.combine_xyz(x=x, y=y, z=z)
     points = gs.set_position(geometry=gs.mesh_to_points(mesh=geometry), position=pos)
-    return gs.instance_on_points(points=points, instance=gs.uv_sphere().mesh)
+    curves = gs.points_to_curves(points=points)
+    mapped_range = gs.map_range(
+        value=gs.scene_time().seconds,
+        from_min=0,
+        from_max=animation_scale,
+        to_min=0,
+        to_max=1,
+    )
+    return gs.sample_curve(curves=curves, factor=mapped_range).position
 
 
 @ns.tree("Animated Orbit")
-def animated_orbit(geometry: ns.Geometry):
-    scene_time = gs.scene_time()
-    svbi = select_vertex_by_index(geometry=geometry, index=scene_time.frame)
-    return spheres_at_vertex_attributes(geometry=svbi)
+def animated_orbit(geometry: ns.Geometry, radius: ns.Float):
+    positions = positions_from_csv(geometry=geometry, animation_scale=10.0)
+    return gs.transform_geometry(geometry=gs.uv_sphere().mesh, translation=positions)
 
 
 @ns.tree("Grid as Points")
