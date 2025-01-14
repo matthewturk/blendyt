@@ -29,6 +29,13 @@ def spheres_at_vertex_attributes(geometry: ns.Geometry):
     return gs.instance_on_points(points=points, instance=gs.uv_sphere().mesh)
 
 
+@ns.tree("Animated Orbit")
+def animated_orbit(geometry: ns.Geometry):
+    scene_time = gs.scene_time()
+    svbi = select_vertex_by_index(geometry=geometry, index=scene_time.frame)
+    return spheres_at_vertex_attributes(geometry=svbi)
+
+
 @ns.tree("Grid as Points")
 def grid_as_points(spec: GridSpecification):
     cube = gs.cube(size=spec.right_edge - spec.left_edge)
