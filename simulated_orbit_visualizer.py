@@ -8,12 +8,9 @@ import glob
 import os
 
 
-class GridSpecification(ns.InputGroup):
-    left_edge: ns.Vector
-    right_edge: ns.Vector
-    nx: ns.Int
-    ny: ns.Int
-    nz: ns.Int
+class IndividualOribt(ns.InputGroup):
+    position: ns.Vector
+    mass: ns.Float
 
 
 @ns.tree("Positions from CSV")
@@ -23,6 +20,9 @@ def positions_from_csv(geometry: ns.Geometry, animation_scale: ns.Float):
     z = gs.named_attribute(name="z").attribute
     pos = gs.combine_xyz(x=x, y=y, z=z)
     points = gs.set_position(geometry=gs.mesh_to_points(mesh=geometry), position=pos)
+    points = gs.store_named_attribute(
+        geometry=points, name="m", value=gs.named_attribute(name="m").attribute
+    )
     curves = gs.points_to_curves(points=points)
     mapped_range = gs.map_range(
         value=gs.scene_time().seconds,
@@ -31,13 +31,18 @@ def positions_from_csv(geometry: ns.Geometry, animation_scale: ns.Float):
         to_min=0,
         to_max=1,
     )
-    return gs.sample_curve(curves=curves, factor=mapped_range).position
+    sampled = gs.sample_curve(
+        curves=curves, value=gs.named_attribute(name="m").attribute, factor=mapped_range
+    )
+    return {"positions": sampled.position, "mass": sampled.value}
 
 
 @ns.tree("Animated Orbit")
 def animated_orbit(geometry: ns.Geometry, radius: ns.Float):
     positions = positions_from_csv(geometry=geometry, animation_scale=10.0)
-    return gs.transform_geometry(geometry=gs.uv_sphere().mesh, translation=positions)
+    return gs.transform_geometry(
+        geometry=gs.uv_sphere().mesh, translation=positions.positions
+    )
 
 
 orbit_path = os.path.expanduser("~/dxl/orbit-experiments")
@@ -59,10 +64,10 @@ for fn in sorted(fns):
 # Now we create the collection "Orbits" if it doesn't exist
 if "Orbits" not in bpy.data.collections:
     orbits = bpy.data.collections.new("Orbits")
+    bpy.context.scene.collection.children.link(orbits)
 else:
     orbits = bpy.data.collections["Orbits"]
 
-bpy.context.scene.collection.children.link(orbits)
 
 for obj in new_objs:
     orbits.objects.link(obj)
