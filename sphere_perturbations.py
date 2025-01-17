@@ -28,11 +28,11 @@ def time_varying_perturbed_sphere(geometry: ns.Geometry, time: ns.Float):
 def emitting_spheres(geometry: ns.Geometry):
     ts = gs.scene_time().frame
     selection = gs.math(
-        operation=gs.Math.Operation.LESS_THAN, value=(gs.index(), ts / 10)
+        operation=gs.Math.Operation.LESS_THAN, value=(1 + gs.index(), ts / 10)
     )
     points = gs.points(count=60)
     sphere = gs.uv_sphere().mesh
     instances = gs.instance_on_points(points=points, instance=sphere)
     return gs.scale_instances(
-        instances=instances, scale=gs.index(), selection=selection
+        instances=instances, scale=(ts * 1.0 / 10) * (gs.index()), selection=selection
     )
