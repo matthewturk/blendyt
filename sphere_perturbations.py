@@ -3,6 +3,39 @@ import nodetree_script.api.dynamic.geometry as gs
 import nodetree_script.api.dynamic.shader as ss
 
 
+@ns.tree("Time Varying Radially Perturbed Sphere")
+def time_varying_radially_perturbed_sphere(
+    geometry: ns.Geometry, magnitude: ns.Float = 0.1
+):
+    ts = gs.scene_time().seconds
+    factor = (ts % 2) / 2.0
+    index = gs.math(operation=gs.Math.Operation.FLOOR, value=(ts / 2))
+    r1 = gs.random_value(
+        data_type=gs.RandomValue.DataType.FLOAT,
+        min=1.0,
+        max=1.0 + magnitude,
+        seed=index,
+    )
+    r2 = gs.random_value(
+        data_type=gs.RandomValue.DataType.FLOAT,
+        min=1.0,
+        max=1.0 + magnitude,
+        seed=index + 1,
+    )
+    sphere = gs.subdivide_mesh(mesh=geometry, level=4).set_position(
+        position=gs.vector_math(
+            operation=gs.VectorMath.Operation.SCALE,
+            vector=gs.vector_math(
+                operation=gs.VectorMath.Operation.NORMALIZE, vector=gs.position()
+            ),
+            scale=gs.mix(data_type=gs.Mix.DataType.VECTOR, factor=factor, a=r1, b=r2),
+        )
+    )
+    return gs.set_position(
+        geometry=sphere,
+    )
+
+
 @ns.tree("Time Varying Perturbed Sphere")
 def time_varying_perturbed_sphere(geometry: ns.Geometry, magnitude: ns.Float = 0.1):
     ts = gs.scene_time().seconds
