@@ -31,11 +31,10 @@ def spherical_coordinates(positions: ns.Vector):
 
 @ns.tree("Time Varying Radially Perturbed Sphere")
 def time_varying_radially_perturbed_sphere(
-    geometry: ns.Geometry, magnitude: ns.Float = 0.1
+    geometry: ns.Geometry, magnitude: ns.Float = 0.1, ts: ns.Float = 0
 ):
-    ts = gs.scene_time().seconds
-    factor = (ts % 2) / 2.0
-    index = gs.math(operation=gs.Math.Operation.FLOOR, value=(ts / 2))
+    factor = (ts % 20) / 20.0
+    index = gs.math(operation=gs.Math.Operation.FLOOR, value=(ts / 20))
     r1 = gs.random_value(
         data_type=gs.RandomValue.DataType.FLOAT,
         min=1.0,
@@ -67,10 +66,11 @@ def time_varying_radially_perturbed_sphere(
 
 
 @ns.tree("Time Varying Perturbed Sphere")
-def time_varying_perturbed_sphere(geometry: ns.Geometry, magnitude: ns.Float = 0.1):
-    ts = gs.scene_time().seconds
-    factor = (ts % 2) / 2.0
-    index = gs.math(operation=gs.Math.Operation.FLOOR, value=(ts / 2))
+def time_varying_perturbed_sphere(
+    geometry: ns.Geometry, magnitude: ns.Float = 0.1, ts: ns.Float = 0
+):
+    factor = (ts % 20) / 20.0
+    index = gs.math(operation=gs.Math.Operation.FLOOR, value=(ts / 20.0))
     r1 = gs.random_value(
         data_type=gs.RandomValue.DataType.FLOAT_VECTOR,
         max=magnitude,
@@ -92,16 +92,17 @@ def time_varying_perturbed_sphere(geometry: ns.Geometry, magnitude: ns.Float = 0
     )
 
 
-@ns.tree("Emitting Spheres")
-def emitting_spheres(geometry: ns.Geometry):
+@ns.tree("Emitted Scale")
+def emitted_scale(frame_delta: ns.Int, index_attribute: ns.String):
     ts = gs.scene_time().frame
+    index = gs.named_attribute(
+        data_type=gs.NamedAttribute.DataType.INT,
+        name=index_attribute,
+    ).attribute
     scale = gs.clamp(
         clamp_type=gs.Clamp.ClampType.MINMAX,
-        value=(ts - gs.index() * 10) / 10,
+        value=(ts - index * frame_delta) / frame_delta,
         min=1.0,
         max=100.0,
     )
-    points = gs.points(count=60)
-    # sphere = gs.uv_sphere().mesh
-    instances = gs.instance_on_points(points=points, instance=geometry)
-    return gs.scale_instances(instances=instances, scale=scale)
+    return scale
