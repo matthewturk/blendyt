@@ -2,14 +2,21 @@ import nodetree_script as ns
 import nodetree_script.api.dynamic.geometry as gs
 import nodetree_script.api.dynamic.shader as ss
 
-@ss.materialtree("Experimental Material")
+
+@ns.materialtree("Experimental Material")
 def experimental_material():
-    base_color = (0.5,0.5,1,1)
+    base_color = (0.5, 0.5, 1, 1)
     time_value = ns.scripted_expression("frame / 250")
     time_value = ss.pingpong(time_value)
-    noise_color = ss.texture_coordinate().generated.noise_texture(noise_dimensions=ss.NoiseTexture.NoiseDimensions._4D, w=time_value).color
-    norm =  ss.bump(normal=noise_color,distance=0.1)
-    shader = ss.glass_bsdf(normal=norm,color=base_color,roughness=0.25)
+    noise_color = (
+        ss.texture_coordinate()
+        .generated.noise_texture(
+            noise_dimensions=ss.NoiseTexture.NoiseDimensions._4D, w=time_value
+        )
+        .color
+    )
+    norm = ss.bump(normal=noise_color, distance=0.1)
+    shader = ss.glass_bsdf(normal=norm, color=base_color, roughness=0.25)
     return shader
 
 
@@ -88,12 +95,13 @@ def time_varying_perturbed_sphere(geometry: ns.Geometry, magnitude: ns.Float = 0
 @ns.tree("Emitting Spheres")
 def emitting_spheres(geometry: ns.Geometry):
     ts = gs.scene_time().frame
-    selection = gs.math(
-        operation=gs.Math.Operation.LESS_THAN, value=(1 + gs.index(), ts / 10)
+    scale = gs.clamp(
+        clamp_type=gs.Clamp.ClampType.MINMAX,
+        value=(ts - gs.index() * 10) / 10,
+        min=1.0,
+        max=100.0,
     )
     points = gs.points(count=60)
     # sphere = gs.uv_sphere().mesh
     instances = gs.instance_on_points(points=points, instance=geometry)
-    return gs.scale_instances(
-        instances=instances, scale=(ts * 1.0 / 10) * (gs.index()), selection=selection
-    )
+    return gs.scale_instances(instances=instances, scale=scale)
