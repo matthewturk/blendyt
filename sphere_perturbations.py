@@ -2,11 +2,15 @@ import nodetree_script as ns
 import nodetree_script.api.dynamic.geometry as gs
 import nodetree_script.api.dynamic.shader as ss
 
-
-@ns.materialtree("Radial Perturbation")
-def radial_perturbation():
-    base_color = (1.0, 0.0, 0.0, 1.0)
-    return ss.principled_bsdf(base_color=base_color)
+@ss.materialtree("Experimental Material")
+def experimental_material():
+    base_color = (0.5,0.5,1,1)
+    time_value = ns.scripted_expression("frame / 250")
+    time_value = ss.pingpong(time_value)
+    noise_color = ss.texture_coordinate().generated.noise_texture(noise_dimensions=ss.NoiseTexture.NoiseDimensions._4D, w=time_value).color
+    norm =  ss.bump(normal=noise_color,distance=0.1)
+    shader = ss.glass_bsdf(normal=norm,color=base_color,roughness=0.25)
+    return shader
 
 
 @ns.tree("Spherical Coordinates")
