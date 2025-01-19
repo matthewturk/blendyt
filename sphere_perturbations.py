@@ -3,6 +3,21 @@ import nodetree_script.api.dynamic.geometry as gs
 import nodetree_script.api.dynamic.shader as ss
 
 
+@ns.materialtree("Radial Perturbation")
+def radial_perturbation():
+    base_color = (1.0, 0.0, 0.0, 1.0)
+    return ss.principled_bsdf(base_color=base_color)
+
+
+@ns.tree("Spherical Coordinates")
+def spherical_coordinates(positions: ns.Vector):
+    r = gs.length(positions)
+    pos = gs.position()
+    theta = gs.math(operation=gs.Math.Operation.ARCCOSINE, value=pos.z / r)
+    phi = gs.math(operation=gs.Math.Operation.ARCTANGENT, value=pos.y / pos.x)
+    return gs.combine_xyz(x=r, y=theta, z=phi)
+
+
 @ns.tree("Time Varying Radially Perturbed Sphere")
 def time_varying_radially_perturbed_sphere(
     geometry: ns.Geometry, magnitude: ns.Float = 0.1
@@ -22,18 +37,22 @@ def time_varying_radially_perturbed_sphere(
         max=1.0 + magnitude,
         seed=index + 1,
     )
-    sphere = gs.subdivide_mesh(mesh=geometry, level=4).set_position(
-        position=gs.vector_math(
-            operation=gs.VectorMath.Operation.SCALE,
-            vector=gs.vector_math(
-                operation=gs.VectorMath.Operation.NORMALIZE, vector=gs.position()
-            ),
-            scale=gs.mix(data_type=gs.Mix.DataType.VECTOR, factor=factor, a=r1, b=r2),
-        )
+    new_positions = gs.vector_math(
+        operation=gs.VectorMath.Operation.SCALE,
+        vector=gs.vector_math(
+            operation=gs.VectorMath.Operation.NORMALIZE, vector=gs.position()
+        ),
+        scale=gs.mix(data_type=gs.Mix.DataType.VECTOR, factor=factor, a=r1, b=r2),
     )
-    return gs.set_position(
-        geometry=sphere,
+    rtp = spherical_coordinates(positions=new_positions)
+    sphere = (
+        gs.subdivide_mesh(mesh=geometry, level=4).set_position(position=new_positions)
+    ).store_named_attribute(
+        data_type=gs.StoreNamedAttribute.DataType.FLOAT_VECTOR,
+        name="spherical_coordinates",
+        value=rtp,
     )
+    return sphere
 
 
 @ns.tree("Time Varying Perturbed Sphere")
@@ -69,8 +88,8 @@ def emitting_spheres(geometry: ns.Geometry):
         operation=gs.Math.Operation.LESS_THAN, value=(1 + gs.index(), ts / 10)
     )
     points = gs.points(count=60)
-    sphere = gs.uv_sphere().mesh
-    instances = gs.instance_on_points(points=points, instance=sphere)
+    # sphere = gs.uv_sphere().mesh
+    instances = gs.instance_on_points(points=points, instance=geometry)
     return gs.scale_instances(
         instances=instances, scale=(ts * 1.0 / 10) * (gs.index()), selection=selection
     )
