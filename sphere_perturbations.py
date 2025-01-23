@@ -25,7 +25,7 @@ def spherical_coordinates(positions: ns.Vector):
     r = gs.length(positions)
     pos = gs.position()
     theta = gs.math(operation=gs.Math.Operation.ARCCOSINE, value=pos.z / r)
-    phi = gs.math(operation=gs.Math.Operation.ARCTANGENT, value=pos.y / pos.x)
+    phi = gs.math(operation=gs.Math.Operation.ARCTAN2, value=(pos.y, pos.x))
     return gs.combine_xyz(x=r, y=theta, z=phi)
 
 
