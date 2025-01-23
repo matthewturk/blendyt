@@ -7,5 +7,5 @@ This repository is where I do some of my Blender experiments. In general they wi
 I have installed a few libraries into Blender:
 
 ```
-$BLENDER_HOME/4.4/bin/python3.11 -m pip install healpy sympy scipy
+$BLENDER_HOME/4.4/bin/python3.11 -m pip install healpy sympy scipy cmyt matplotlib
 ```
