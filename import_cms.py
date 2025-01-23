@@ -5,13 +5,13 @@ import cmyt
 
 vals = np.mgrid[0.0:1.0:256j]
 
-arr = np.zeros((256, 1, 4), dtype="f4")
+arr = np.zeros((256, 64, 4), dtype="f4")
 
 
 for cmap_name in cmyt._utils.cmyt_cmaps:
     if f"cmyt_{cmap_name}" not in bpy.data.images:
         img = bpy.data.images.new(
-            f"cmyt_{cmap_name}", 1, 256, alpha=False, float_buffer=True
+            f"cmyt_{cmap_name}", 64, 256, alpha=False, float_buffer=True
         )
     else:
         img = bpy.data.images[f"cmyt_{cmap_name}"]
