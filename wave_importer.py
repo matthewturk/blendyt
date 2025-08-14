@@ -1,6 +1,7 @@
 import os
 import bpy
 import h5py
+import numpy as np
 
 frames = []
 
@@ -22,3 +23,9 @@ for obj in frames[1:]:
     new_shape_key.points.foreach_set("co", obj.flatten())
 
 bpy.context.scene.collection.objects.link(surf_obj)
+
+with h5py.File(os.path.expanduser("~/dxl/gwave/isosurface_values.h5"), "r") as f:
+    values = np.log10(f["/values"][:])
+
+values_attribute = new_mesh.attributes.new(name="SurfaceValue", type="FLOAT", domain="POINT")
+values_attribute.data.foreach_set("value", values)
