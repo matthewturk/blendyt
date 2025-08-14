@@ -1,10 +1,6 @@
-import glob
 import os
-import databpy
-import polars as pr
 import bpy
 import h5py
-import numpy as np
 
 frames = []
 
