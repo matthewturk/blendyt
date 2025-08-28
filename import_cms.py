@@ -19,3 +19,5 @@ for cmap_name in cmyt._utils.cmyt_cmaps:
     cmap.set_clim(0.0, 1.0)
     arr[:] = cmap.to_rgba(vals).astype("f4")[:, None, :]
     img.pixels.foreach_set(arr.ravel(order="C"))
+    img.pack()
+    img.use_fake_user = True 
