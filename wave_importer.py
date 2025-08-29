@@ -78,10 +78,10 @@ if add_bhs:
     # We do these differently, because they're single objects.
 
     bhp = databpy.create_bob(primary_pos, name="Primary Black Hole")
-    bhp.store_named_attribute(primary_r, "radius")
+    bhp.store_named_attribute(primary_r, "bh_radius")
 
     bhs = databpy.create_bob(secondary_pos, name="Secondary Black Hole")
-    bhs.store_named_attribute(secondary_r, "radius")
+    bhs.store_named_attribute(secondary_r, "bh_radius")
 
     bhf = databpy.create_bob(final_pos, name="Final Black Hole")
-    bhf.store_named_attribute(final_r, "radius")
+    bhf.store_named_attribute(final_r, "bh_radius")
